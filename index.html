@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Base de datos y visualización de daño de armas de PUBG Mobile.">
-    <title>PUBGM Wiki | Armas</title>
+    <meta name="description" content="Comparador de daño de armas de PUBG Mobile.">
+    <title>PUBGM Wiki | Comparador de armas</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <script src="assets/js/app.js" defer></script>
 </head>
@@ -12,7 +13,7 @@
     <header class="site-header">
         <a class="logo" href="#">PUBGM<span>WIKI</span></a>
         <nav>
-            <a href="#armas">Armas</a>
+            <a href="#comparador">Comparador</a>
         </nav>
     </header>
 
@@ -21,56 +22,89 @@
             <div class="hero-content">
                 <p class="eyebrow">BASE DE DATOS</p>
                 <h1>PUBG MOBILE</h1>
-                <p>Explorá las armas y consultá su daño según la distancia y la zona de impacto.</p>
+                <p>Compará el daño de dos armas según la distancia y la zona de impacto.</p>
             </div>
         </section>
 
-        <section class="weapons-section" id="armas">
+        <section class="comparison-section" id="comparador">
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">ARMAMENTO</p>
-                    <h2>Daño de armas</h2>
+                    <p class="eyebrow">HERRAMIENTA</p>
+                    <h2>Comparador de armas</h2>
                 </div>
                 <span id="data-status" class="status">Cargando datos...</span>
             </div>
 
-            <div class="filters">
-                <div class="filter-group search-group">
-                    <label for="weapon-search">Buscar arma</label>
-                    <input
-                        type="search"
-                        id="weapon-search"
-                        placeholder="Ej. M416, AKM, AWM..."
-                        autocomplete="off"
-                    >
-                </div>
-
-                <div class="filter-group distance-group">
-                    <label for="distance-filter">Distancia</label>
-                    <select id="distance-filter">
-                        <option value="0">0 m</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="weapons-layout">
-                <aside class="weapon-panel">
-                    <div class="panel-heading">
-                        <h3>Armas</h3>
-                        <span id="results-count">0</span>
+            <div class="comparison-grid">
+                <section class="weapon-card" id="weapon-card-1">
+                    <div class="card-heading">
+                        <span class="weapon-number">01</span>
+                        <h3>Arma izquierda</h3>
                     </div>
-                    <div id="weapon-list" class="weapon-list">
-                        <p class="empty-message">Cargando armas...</p>
-                    </div>
-                </aside>
 
-                <section class="damage-panel" id="damage-panel">
-                    <div id="weapon-detail" class="weapon-detail">
-                        <div class="empty-detail">
-                            <div class="empty-icon">⌖</div>
-                            <h3>Seleccioná un arma</h3>
-                            <p>Elegí un arma de la lista para consultar su daño por zona de impacto.</p>
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="weapon-search-1">Buscar arma</label>
+                            <input
+                                type="search"
+                                id="weapon-search-1"
+                                placeholder="Ej. M416, AKM, AWM..."
+                                autocomplete="off"
+                            >
                         </div>
+
+                        <div class="filter-group">
+                            <label for="distance-filter-1">Distancia</label>
+                            <select id="distance-filter-1"></select>
+                        </div>
+                    </div>
+
+                    <div class="weapon-selector">
+                        <div class="selector-heading">
+                            <span>Seleccionar arma</span>
+                            <span id="results-count-1">0</span>
+                        </div>
+                        <div id="weapon-list-1" class="weapon-list"></div>
+                    </div>
+
+                    <div class="damage-panel">
+                        <div id="weapon-detail-1" class="weapon-detail"></div>
+                    </div>
+                </section>
+
+                <section class="weapon-card" id="weapon-card-2">
+                    <div class="card-heading">
+                        <span class="weapon-number">02</span>
+                        <h3>Arma derecha</h3>
+                    </div>
+
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="weapon-search-2">Buscar arma</label>
+                            <input
+                                type="search"
+                                id="weapon-search-2"
+                                placeholder="Ej. M416, AKM, AWM..."
+                                autocomplete="off"
+                            >
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="distance-filter-2">Distancia</label>
+                            <select id="distance-filter-2"></select>
+                        </div>
+                    </div>
+
+                    <div class="weapon-selector">
+                        <div class="selector-heading">
+                            <span>Seleccionar arma</span>
+                            <span id="results-count-2">0</span>
+                        </div>
+                        <div id="weapon-list-2" class="weapon-list"></div>
+                    </div>
+
+                    <div class="damage-panel">
+                        <div id="weapon-detail-2" class="weapon-detail"></div>
                     </div>
                 </section>
             </div>
@@ -78,8 +112,7 @@
     </main>
 
     <footer class="site-footer">
-        <p>PUBGM WIKI — Base de datos de daño de armas.</p>
+        <p>PUBGM WIKI — Comparador de daño de armas.</p>
     </footer>
 </body>
-    </html>
-    
+</html>
