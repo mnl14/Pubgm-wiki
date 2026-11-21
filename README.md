@@ -1,1 +1,1 @@
-# Pubgm-wiki
+# PUBG Mobile Wiki
