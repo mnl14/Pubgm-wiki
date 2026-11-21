@@ -172,7 +172,7 @@ function applyProtection(damage, reduction) {
 }
 
 function formatDamage(value) {
-    return Number(value.toFixed(1)).toString();
+    return Math.round(value).toString();
 }
 
 function getProtectedDamage(data, panel) {
