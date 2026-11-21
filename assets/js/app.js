@@ -4,6 +4,38 @@ const CSV_PATH = "data/dano_base.csv";
 const database = [];
 const panels = [];
 
+const IMAGE_PATH = "assets/img/";
+
+// Arma del CSV -> archivo de imagen.
+// Si falta una arma, no tiene imagen todavía.
+const WEAPON_IMAGES = {
+    "ACE32": "Item_Weapon_ACE32_C_h.png",
+    "AKM": "Item_Weapon_AK47_C_h.png",
+    "AUG": "Item_Weapon_AUG_C_h.png",
+    "AWM": "Item_Weapon_AWM_C_h.png",
+    "DP-28": "Item_Weapon_DP28_C_h.png",
+    "DSR": "Item_Weapon_L6_C_h.png",
+    "Groza": "Item_Weapon_GROZA_C_h.png",
+    "Kar98K": "Item_Weapon_Kar98k_C_h.png",
+    "M1 Garand": "Item_Weapon_Mosin_C_h.png",
+    "M16A4": "Item_Weapon_M16A4_C_h.png",
+    "M24": "Item_Weapon_M24_C_h.png",
+    "M249": "Item_Weapon_M249_C_h.png",
+    "M416": "Item_Weapon_HK416_C_h.png",
+    "M762": "Item_Weapon_BerylM762_C_h.png",
+    "MG3": "Item_Weapon_MG3_C_h.png",
+    "Mini14": "Item_Weapon_Mini14_C_h.png",
+    "Mk12": "Item_Weapon_Mk12_C_h.png",
+    "P90": "Item_Weapon_P90_C_h.png",
+    "PP-19 Bizon": "Item_Weapon_BizonPP19_C_h.png",
+    "SCAR-L": "Item_Weapon_SCAR-L_C_h.png",
+    "SKS": "Item_Weapon_SKS_C_h.png",
+    "SLR": "Item_Weapon_FNFAL_C_h.png",
+    "UMP": "Item_Weapon_UMP_C_h.png",
+    "UZI": "Item_Weapon_UZI_C_h.png",
+    "Vector": "Item_Weapon_Vector_C_h.png"
+};
+
 function parseCSV(text) {
     text = text.replace(/^\uFEFF/, "");
 
@@ -256,6 +288,27 @@ function renderBodyDiagram(data) {
     `;
 }
 
+function renderWeaponImage(weapon) {
+    const file = WEAPON_IMAGES[weapon];
+
+    if (!file) {
+        return `
+            <div class="weapon-image placeholder">
+                <span>Imagen no disponible</span>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="weapon-image">
+            <img src="${IMAGE_PATH}${encodeURIComponent(file)}"
+                 alt="${escapeHTML(weapon)}"
+                 loading="lazy"
+                 onerror="this.parentElement.classList.add('placeholder'); this.replaceWith(Object.assign(document.createElement('span'), {textContent: 'Imagen no disponible'}));">
+        </div>
+    `;
+}
+
 function renderWeaponDetail(panel) {
     if (!panel.selectedWeapon) {
         showEmptyDetail(panel);
@@ -287,7 +340,10 @@ function renderWeaponDetail(panel) {
         <div class="damage-content">
             ${renderBodyDiagram(damage)}
 
-            <div class="damage-values">
+            <div class="damage-side">
+                ${renderWeaponImage(data.weapon)}
+
+                <div class="damage-values">
                 <div class="damage-value">
                     <span class="zone-name">Cabeza</span>
                     <strong>${formatDamage(damage.head)}</strong>
@@ -306,6 +362,7 @@ function renderWeaponDetail(panel) {
                 <div class="damage-value">
                     <span class="zone-name">Pies</span>
                     <strong>${formatDamage(damage.feet)}</strong>
+                </div>
                 </div>
             </div>
         </div>
@@ -425,4 +482,5 @@ async function loadDatabase() {
 }
 
 document.addEventListener("DOMContentLoaded", loadDatabase);
+
         
