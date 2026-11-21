@@ -198,6 +198,14 @@ a {
     border-color: var(--primary);
 }
 
+.equipment-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
 .selector-heading {
     display: flex;
     justify-content: space-between;
@@ -432,6 +440,11 @@ a {
         gap: 8px;
     }
 
+    .equipment-filters {
+        padding: 12px;
+        gap: 8px;
+    }
+
     .damage-content {
         grid-template-columns: 1fr;
     }
@@ -444,3 +457,4 @@ a {
         width: 100%;
     }
     }
+    
