@@ -361,6 +361,38 @@ a {
     stroke-linejoin: round;
 }
 
+.damage-side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.weapon-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 16 / 5;
+    padding: 4px;
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.weapon-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.weapon-image.placeholder span {
+    color: var(--muted);
+    font-size: 11px;
+    text-align: center;
+}
+
 .damage-values {
     display: flex;
     flex-direction: column;
@@ -457,4 +489,5 @@ a {
         width: 100%;
     }
     }
+
     
