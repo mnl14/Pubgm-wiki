@@ -101,9 +101,10 @@ function createPanel(id, defaultWeapon) {
         id,
         selectedWeapon: defaultWeapon,
         search: document.getElementById(`weapon-search-${id}`),
-        distance: document.getElementById(`distance-filter-${id}`),
-        helmet: document.getElementById(`helmet-filter-${id}`),
-        vest: document.getElementById(`vest-filter-${id}`),
+        distance: 0,
+        distances: [],
+        helmet: 0,
+        vest: 0,
         list: document.getElementById(`weapon-list-${id}`),
         detail: document.getElementById(`weapon-detail-${id}`),
         count: document.getElementById(`results-count-${id}`)
@@ -111,22 +112,13 @@ function createPanel(id, defaultWeapon) {
 }
 
 function populateDistances(panel) {
-    const distances = [...new Set(
+    panel.distances = [...new Set(
         database.map(item => item.distance)
     )].sort((a, b) => a - b);
 
-    panel.distance.innerHTML = "";
-
-    distances.forEach(distance => {
-        const option = document.createElement("option");
-        option.value = distance;
-        option.textContent = `${distance} m`;
-        panel.distance.appendChild(option);
-    });
-
-    panel.distance.value = distances.includes(0)
-        ? "0"
-        : String(distances[0]);
+    panel.distance = panel.distances.includes(0)
+        ? 0
+        : panel.distances[0];
 }
 
 function getWeapons(panel) {
@@ -182,7 +174,7 @@ function renderWeaponList(panel) {
 }
 
 function getWeaponData(panel) {
-    const distance = Number(panel.distance.value);
+    const distance = panel.distance;
 
     return database.find(item =>
         item.weapon === panel.selectedWeapon &&
@@ -192,11 +184,79 @@ function getWeaponData(panel) {
 
 function showEmptyDetail(panel, title = "Seleccioná un arma") {
     panel.detail.innerHTML = `
+        ${renderDetailHeader(panel, panel.selectedWeapon || "—")}
+
         <div class="empty-detail">
             <h3>${escapeHTML(title)}</h3>
             <p>Elegí un arma de la lista para consultar su daño.</p>
         </div>
     `;
+
+    bindDetailControls(panel);
+}
+
+function renderDetailHeader(panel, title) {
+    const buttons = panel.distances.map(distance => `
+        <button type="button"
+                class="segment${distance === panel.distance ? " active" : ""}"
+                data-distance="${distance}">${distance}</button>
+    `).join("");
+
+    return `
+        <div class="detail-header">
+            <div class="distance-control">
+                <p class="eyebrow">DISTANCIA (m)</p>
+                <div class="segmented" role="group" aria-label="Distancia">
+                    ${buttons}
+                </div>
+            </div>
+
+            <div class="weapon-title">
+                <p class="eyebrow">DAÑO POR ZONA</p>
+                <h3>${escapeHTML(title)}</h3>
+            </div>
+        </div>
+    `;
+}
+
+const PROTECTION_LEVELS = [
+    { value: 0, label: "Sin", title: "Sin protección" },
+    { value: 0.30, label: "Nv 1", title: "Nivel 1 (−30 %)" },
+    { value: 0.40, label: "Nv 2", title: "Nivel 2 (−40 %)" },
+    { value: 0.55, label: "Nv 3", title: "Nivel 3 (−55 %)" }
+];
+
+function renderEquipmentGroup(panel, key, label) {
+    const buttons = PROTECTION_LEVELS.map(level => `
+        <button type="button"
+                class="segment${level.value === panel[key] ? " active" : ""}"
+                title="${level.title}"
+                data-equip="${key}"
+                data-value="${level.value}">${level.label}</button>
+    `).join("");
+
+    return `
+        <div class="equipment-group">
+            <span class="equipment-label">${label}</span>
+            <div class="segmented">${buttons}</div>
+        </div>
+    `;
+}
+
+function bindDetailControls(panel) {
+    panel.detail.querySelectorAll("[data-distance]").forEach(button => {
+        button.addEventListener("click", () => {
+            panel.distance = Number(button.dataset.distance);
+            renderWeaponDetail(panel);
+        });
+    });
+
+    panel.detail.querySelectorAll("[data-equip]").forEach(button => {
+        button.addEventListener("click", () => {
+            panel[button.dataset.equip] = Number(button.dataset.value);
+            renderWeaponDetail(panel);
+        });
+    });
 }
 
 function applyProtection(damage, reduction) {
@@ -208,8 +268,8 @@ function formatDamage(value) {
 }
 
 function getProtectedDamage(data, panel) {
-    const helmetReduction = Number(panel.helmet.value);
-    const vestReduction = Number(panel.vest.value);
+    const helmetReduction = panel.helmet;
+    const vestReduction = panel.vest;
 
     return {
         head: applyProtection(data.head, helmetReduction),
@@ -219,70 +279,69 @@ function getProtectedDamage(data, panel) {
     };
 }
 
+// Figura humana (proporción de 8 cabezas).
+// Cada pieza se dibuja en el lado izquierdo
+// y se refleja en el derecho (eje central x = 160).
+const BODY_PARTS = {
+    neck: "M149 64 L171 64 L173 92 C166 97 154 97 147 92 Z",
+
+    head: "M160 10 C173 10 182 22 182 38 C182 50 178 60 171 67 " +
+          "C167 71 164 73 160 73 C156 73 153 71 149 67 " +
+          "C142 60 138 50 138 38 C138 22 147 10 160 10 Z",
+
+    chest: "M160 94 C150 94 138 96 128 100 C118 102 112 108 111 120 " +
+           "C111 140 114 156 117 172 C119 186 121 196 123 204 L160 204 Z",
+
+    arm: "M130 98 C112 98 98 106 94 124 C91 142 89 160 86 178 " +
+         "C84 190 82 200 81 208 C78 226 74 248 71 268 " +
+         "C69 280 66 292 66 304 C66 312 70 318 74 318 " +
+         "C80 318 83 312 84 304 C85 292 86 282 88 270 " +
+         "C92 250 98 228 100 210 C102 198 106 184 109 172 " +
+         "C112 160 114 146 115 132 Z",
+
+    lower: "M160 204 L123 204 C121 216 119 228 117 242 " +
+           "C115 250 114 258 115 268 C115 300 117 330 120 352 " +
+           "C122 362 122 372 121 382 C119 400 118 418 121 436 " +
+           "C123 454 126 470 130 484 L146 484 " +
+           "C146 468 147 452 149 436 C150 420 150 404 148 390 " +
+           "C148 380 147 372 147 362 C150 340 153 310 156 290 " +
+           "C158 280 159 272 160 264 Z",
+
+    foot: "M130 480 L146 480 C148 490 150 498 148 503 " +
+          "C140 508 124 508 112 506 C106 505 104 500 108 495 " +
+          "C116 492 125 488 130 480 Z"
+};
+
+function mirrorPart(path, className) {
+    return `
+        <path class="${className}" d="${path}"/>
+        <path class="${className}" d="${path}"
+              transform="translate(320 0) scale(-1 1)"/>
+    `;
+}
+
 function renderBodyDiagram(data) {
+    const feet = formatDamage(data.feet);
+
     return `
         <div class="body-visual">
-            <svg viewBox="0 0 320 510"
+            <svg viewBox="0 0 320 520"
                  role="img"
                  aria-label="Figura humana con valores de daño por zona">
 
-                <circle class="body-base" cx="160" cy="48" r="31"/>
+                <path class="body-base" d="${BODY_PARTS.neck}"/>
 
-                <path class="body-base"
-                    d="M145 80 L175 80 L180 105 L140 105 Z"/>
+                ${mirrorPart(BODY_PARTS.arm, "body-zone limbs")}
+                ${mirrorPart(BODY_PARTS.lower, "body-zone limbs")}
+                ${mirrorPart(BODY_PARTS.chest, "body-zone chest")}
+                <path class="body-zone" d="${BODY_PARTS.head}"/>
+                ${mirrorPart(BODY_PARTS.foot, "body-zone feet")}
 
-                <path class="body-base"
-                    d="M112 105 Q160 88 208 105
-                       L222 230 L98 230 Z"/>
-
-                <path class="body-base"
-                    d="M112 110 L82 120 L47 260
-                       L66 268 L116 155 Z"/>
-
-                <path class="body-base"
-                    d="M208 110 L238 120 L273 260
-                       L254 268 L204 155 Z"/>
-
-                <path class="body-base"
-                    d="M110 225 L210 225 L194 365
-                       L166 365 L160 255 L154 365 L126 365 Z"/>
-
-                <path class="body-base"
-                    d="M126 355 L154 355 L143 455 L112 455 Z"/>
-
-                <path class="body-base"
-                    d="M166 355 L194 355 L208 455 L177 455 Z"/>
-
-                <path class="body-base"
-                    d="M112 445 L143 445 L143 470
-                       L95 470 Q88 460 112 445 Z"/>
-
-                <path class="body-base"
-                    d="M177 445 L208 445 L225 470 L177 470 Z"/>
-
-                <circle class="body-zone" cx="160" cy="48" r="29"/>
-
-                <path class="body-zone chest"
-                    d="M115 111 Q160 96 205 111
-                       L215 220 L105 220 Z"/>
-
-                <path class="body-zone limbs"
-                    d="M110 115 L82 126 L52 257
-                       L66 263 L116 155 Z
-                       M210 115 L238 126 L268 257
-                       L254 263 L204 155 Z
-                       M112 230 L208 230 L192 355
-                       L166 355 L160 260 L154 355 L128 355 Z"/>
-
-                <path class="body-zone feet"
-                    d="M112 445 L143 445 L143 470
-                       L95 470 Q88 460 112 445 Z
-                       M177 445 L208 445 L225 470 L177 470 Z"/>
-
-                <text x="160" y="49">${formatDamage(data.head)}</text>
-                <text x="160" y="165">${formatDamage(data.chest)}</text>
-                <text x="160" y="295">${formatDamage(data.limbs)}</text>
-                <text x="160" y="465">${formatDamage(data.feet)}</text>
+                <text class="t-head" x="160" y="42">${formatDamage(data.head)}</text>
+                <text class="t-main" x="160" y="150">${formatDamage(data.chest)}</text>
+                <text class="t-main" x="160" y="244">${formatDamage(data.limbs)}</text>
+                <text class="t-feet" x="130" y="494">${feet}</text>
+                <text class="t-feet" x="190" y="494">${feet}</text>
             </svg>
         </div>
     `;
@@ -316,7 +375,7 @@ function renderWeaponDetail(panel) {
     }
 
     const data = getWeaponData(panel);
-    const distance = Number(panel.distance.value);
+    const distance = panel.distance;
 
     if (!data) {
         showEmptyDetail(
@@ -329,13 +388,7 @@ function renderWeaponDetail(panel) {
     const damage = getProtectedDamage(data, panel);
 
     panel.detail.innerHTML = `
-        <div class="detail-header">
-            <div>
-                <p class="eyebrow">DAÑO POR ZONA</p>
-                <h3>${escapeHTML(data.weapon)}</h3>
-            </div>
-            <span class="detail-distance">${distance} m</span>
-        </div>
+        ${renderDetailHeader(panel, data.weapon)}
 
         <div class="damage-content">
             ${renderBodyDiagram(damage)}
@@ -367,10 +420,17 @@ function renderWeaponDetail(panel) {
             </div>
         </div>
 
+        <div class="equipment-controls">
+            ${renderEquipmentGroup(panel, "helmet", "Casco")}
+            ${renderEquipmentGroup(panel, "vest", "Chaleco")}
+        </div>
+
         <p class="damage-note">
             Daño recibido según la distancia y protección seleccionadas.
         </p>
     `;
+
+    bindDetailControls(panel);
 }
 
 async function loadDatabase() {
@@ -448,18 +508,6 @@ async function loadDatabase() {
             panel.search.addEventListener("input", () => {
                 renderWeaponList(panel);
             });
-
-            panel.distance.addEventListener("change", () => {
-                renderWeaponDetail(panel);
-            });
-
-            panel.helmet.addEventListener("change", () => {
-                renderWeaponDetail(panel);
-            });
-
-            panel.vest.addEventListener("change", () => {
-                renderWeaponDetail(panel);
-            });
         });
 
         dataStatus.textContent = "Base de datos cargada";
@@ -482,5 +530,3 @@ async function loadDatabase() {
 }
 
 document.addEventListener("DOMContentLoaded", loadDatabase);
-
-                        
