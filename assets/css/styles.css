@@ -160,7 +160,7 @@ a {
 
 .filters {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 120px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     padding: 16px;
     border-bottom: 1px solid var(--border);
@@ -198,13 +198,6 @@ a {
     border-color: var(--primary);
 }
 
-.equipment-filters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-}
 
 .selector-heading {
     display: flex;
@@ -287,21 +280,81 @@ a {
 .detail-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px 16px;
     padding: 17px 19px;
     border-bottom: 1px solid var(--border);
 }
 
-.detail-header h3 {
-    font-size: 21px;
+.detail-header .eyebrow {
+    margin-bottom: 7px;
+    font-size: 10px;
 }
 
-.detail-distance {
-    color: var(--primary);
-    font-size: 13px;
+.weapon-title {
+    min-width: 0;
+    margin-left: auto;
+    text-align: right;
+}
+
+.weapon-title h3 {
+    font-size: 30px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+.segmented {
+    display: flex;
+    gap: 4px;
+}
+
+.segment {
+    min-width: 38px;
+    padding: 8px 9px;
+    color: #c4cbd4;
+    background: var(--surface-light);
+    border: 1px solid transparent;
+    border-radius: 5px;
+    font-size: 12px;
     font-weight: 700;
-    white-space: nowrap;
+    cursor: pointer;
+}
+
+.segment:hover {
+    border-color: #626d7b;
+}
+
+.segment.active {
+    color: var(--primary);
+    background: rgba(229, 185, 79, .09);
+    border-color: rgba(229, 185, 79, .5);
+}
+
+.equipment-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0 18px 14px;
+}
+
+.equipment-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.equipment-label {
+    color: #c4cbd4;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.equipment-group .segment {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 4px;
+    font-size: 11px;
 }
 
 .damage-content {
@@ -351,14 +404,22 @@ a {
 .body-visual text {
     fill: #fff;
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
+    font-size: 28px;
     font-weight: 700;
     text-anchor: middle;
     dominant-baseline: middle;
     paint-order: stroke;
-    stroke: rgba(0, 0, 0, .55);
-    stroke-width: 2px;
+    stroke: rgba(0, 0, 0, .6);
+    stroke-width: 3px;
     stroke-linejoin: round;
+}
+
+.body-visual text.t-head {
+    font-size: 24px;
+}
+
+.body-visual text.t-feet {
+    font-size: 17px;
 }
 
 .damage-side {
@@ -467,14 +528,7 @@ a {
     }
 
     .filters {
-        grid-template-columns: 1fr 105px;
         padding: 12px;
-        gap: 8px;
-    }
-
-    .equipment-filters {
-        padding: 12px;
-        gap: 8px;
     }
 
     .damage-content {
@@ -483,6 +537,10 @@ a {
 
     .body-visual {
         max-width: 250px;
+    }
+
+    .weapon-title h3 {
+        font-size: 24px;
     }
 
     .damage-values {
