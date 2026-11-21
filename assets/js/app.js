@@ -70,6 +70,8 @@ function createPanel(id, defaultWeapon) {
         selectedWeapon: defaultWeapon,
         search: document.getElementById(`weapon-search-${id}`),
         distance: document.getElementById(`distance-filter-${id}`),
+        helmet: document.getElementById(`helmet-filter-${id}`),
+        vest: document.getElementById(`vest-filter-${id}`),
         list: document.getElementById(`weapon-list-${id}`),
         detail: document.getElementById(`weapon-detail-${id}`),
         count: document.getElementById(`results-count-${id}`)
@@ -165,6 +167,26 @@ function showEmptyDetail(panel, title = "Seleccioná un arma") {
     `;
 }
 
+function applyProtection(damage, reduction) {
+    return damage * (1 - reduction);
+}
+
+function formatDamage(value) {
+    return Number(value.toFixed(1)).toString();
+}
+
+function getProtectedDamage(data, panel) {
+    const helmetReduction = Number(panel.helmet.value);
+    const vestReduction = Number(panel.vest.value);
+
+    return {
+        head: applyProtection(data.head, helmetReduction),
+        chest: applyProtection(data.chest, vestReduction),
+        limbs: data.limbs,
+        feet: data.feet
+    };
+}
+
 function renderBodyDiagram(data) {
     return `
         <div class="body-visual">
@@ -225,10 +247,10 @@ function renderBodyDiagram(data) {
                        L95 470 Q88 460 112 445 Z
                        M177 445 L208 445 L225 470 L177 470 Z"/>
 
-                <text x="160" y="49">${data.head}</text>
-                <text x="160" y="165">${data.chest}</text>
-                <text x="160" y="295">${data.limbs}</text>
-                <text x="160" y="465">${data.feet}</text>
+                <text x="160" y="49">${formatDamage(data.head)}</text>
+                <text x="160" y="165">${formatDamage(data.chest)}</text>
+                <text x="160" y="295">${formatDamage(data.limbs)}</text>
+                <text x="160" y="465">${formatDamage(data.feet)}</text>
             </svg>
         </div>
     `;
@@ -251,6 +273,8 @@ function renderWeaponDetail(panel) {
         return;
     }
 
+    const damage = getProtectedDamage(data, panel);
+
     panel.detail.innerHTML = `
         <div class="detail-header">
             <div>
@@ -261,33 +285,33 @@ function renderWeaponDetail(panel) {
         </div>
 
         <div class="damage-content">
-            ${renderBodyDiagram(data)}
+            ${renderBodyDiagram(damage)}
 
             <div class="damage-values">
                 <div class="damage-value">
                     <span class="zone-name">Cabeza</span>
-                    <strong>${data.head}</strong>
+                    <strong>${formatDamage(damage.head)}</strong>
                 </div>
 
                 <div class="damage-value">
                     <span class="zone-name">Pecho</span>
-                    <strong>${data.chest}</strong>
+                    <strong>${formatDamage(damage.chest)}</strong>
                 </div>
 
                 <div class="damage-value">
                     <span class="zone-name">Brazos y piernas</span>
-                    <strong>${data.limbs}</strong>
+                    <strong>${formatDamage(damage.limbs)}</strong>
                 </div>
 
                 <div class="damage-value">
                     <span class="zone-name">Pies</span>
-                    <strong>${data.feet}</strong>
+                    <strong>${formatDamage(damage.feet)}</strong>
                 </div>
             </div>
         </div>
 
         <p class="damage-note">
-            Daño registrado para la distancia seleccionada.
+            Daño recibido según la distancia y protección seleccionadas.
         </p>
     `;
 }
@@ -371,6 +395,14 @@ async function loadDatabase() {
             panel.distance.addEventListener("change", () => {
                 renderWeaponDetail(panel);
             });
+
+            panel.helmet.addEventListener("change", () => {
+                renderWeaponDetail(panel);
+            });
+
+            panel.vest.addEventListener("change", () => {
+                renderWeaponDetail(panel);
+            });
         });
 
         dataStatus.textContent = "Base de datos cargada";
@@ -393,3 +425,4 @@ async function loadDatabase() {
 }
 
 document.addEventListener("DOMContentLoaded", loadDatabase);
+        
